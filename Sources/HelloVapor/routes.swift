@@ -9,6 +9,12 @@ func routes(_ app: Application) throws {
     app.get("hello") { req async -> String in
         "Hello, world!"
     }
-
-    try app.register(collection: TodoController())
+    
+    try app.register(collection: AuthController())
+    try app.register(collection: CoffeeTypeController())
+    try app.register(collection: LocationController())
+    try app.register(collection: OrderController())
+    try app.register(collection: ReviewController())
+    try app.register(collection: FavoriteController())
+    try app.register(collection: LocationHoursController())
 }
