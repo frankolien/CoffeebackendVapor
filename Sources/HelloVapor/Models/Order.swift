@@ -36,7 +36,7 @@ final class Order: Model, Content, @unchecked Sendable {
     var status: OrderStatus
     
     @Field(key: "size")
-    var size: String?
+    var size: String?  // Stores "S", "M", or "L"
     
     @Field(key: "milk_type")
     var milkType: String?

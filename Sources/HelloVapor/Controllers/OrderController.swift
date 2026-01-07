@@ -98,7 +98,30 @@ struct OrderController: RouteCollection {
             throw Abort(.badRequest, reason: "Quantity must be greater than 0")
         }
         
-        let totalPrice = coffeeType.price * Double(orderDTO.quantity)
+        // Validate size if provided
+        if let size = orderDTO.size {
+            let validSizes = ["S", "M", "L"]
+            guard validSizes.contains(size.uppercased()) else {
+                throw Abort(.badRequest, reason: "Size must be S, M, or L")
+            }
+        }
+        
+        // Calculate price based on size
+        var basePrice = coffeeType.price
+        if let size = orderDTO.size {
+            switch size.uppercased() {
+            case "S":
+                basePrice *= 0.9  // 10% discount for small
+            case "M":
+                basePrice *= 1.0  // Base price for medium
+            case "L":
+                basePrice *= 1.2  // 20% premium for large
+            default:
+                break
+            }
+        }
+        
+        let totalPrice = basePrice * Double(orderDTO.quantity)
         
         let order = Order(
             userID: user.id!,
@@ -139,7 +162,27 @@ struct OrderController: RouteCollection {
         }
         
         if let size = updateDTO.size {
-            order.size = size
+            // Validate size
+            let validSizes = ["S", "M", "L"]
+            guard validSizes.contains(size.uppercased()) else {
+                throw Abort(.badRequest, reason: "Size must be S, M, or L")
+            }
+            order.size = size.uppercased()
+            
+            // Recalculate price if size changes
+            let coffeeType = try await order.$coffeeType.get(on: req.db)
+            var basePrice = coffeeType.price
+            switch size.uppercased() {
+            case "S":
+                basePrice *= 0.9
+            case "M":
+                basePrice *= 1.0
+            case "L":
+                basePrice *= 1.2
+            default:
+                break
+            }
+            order.totalPrice = basePrice * Double(order.quantity)
         }
         if let milkType = updateDTO.milkType {
             order.milkType = milkType

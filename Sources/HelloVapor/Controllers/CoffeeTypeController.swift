@@ -77,6 +77,23 @@ struct CoffeeTypeController: RouteCollection {
             throw Abort(.badRequest, reason: "Name and price are required")
         }
         
+        // Validate name is not empty
+        guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw Abort(.badRequest, reason: "Name cannot be empty")
+        }
+        
+        // Validate price is positive
+        guard price > 0 else {
+            throw Abort(.badRequest, reason: "Price must be greater than 0")
+        }
+        
+        // Validate description if provided
+        if let description = coffeeTypeDTO.description {
+            guard !description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                throw Abort(.badRequest, reason: "Description cannot be empty if provided")
+            }
+        }
+        
         let coffeeType = CoffeeType(
             name: name,
             description: coffeeTypeDTO.description,
